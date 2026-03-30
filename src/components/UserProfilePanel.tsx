@@ -14,7 +14,7 @@ import type { WishlistItem } from '../types/wishlist';
 interface UserProfilePanelProps {
   isOpen: boolean;
   onClose: () => void;
-  onNavigate: (target: string) => void;
+  onNavigate: (target: string, param?: string) => void;
   onOpenVideo: () => void;
   wishlist: WishlistItem[];
   onToggleWishlist: (productId: string) => void;
@@ -131,7 +131,11 @@ export function UserProfilePanel({
                   wishlistProducts.map((product) => (
                     <div
                       key={product.id}
-                      className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-[#161616] px-4 py-3"
+                      onClick={() => {
+                        onNavigate('product', product.id);
+                        onClose();
+                      }}
+                      className="flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-white/10 bg-[#161616] px-4 py-3 transition-colors hover:border-[#ff9069]/40 hover:bg-[#1d1d1d]"
                     >
                       <div className="flex items-center gap-3">
                         <img
@@ -150,7 +154,10 @@ export function UserProfilePanel({
                         </div>
                       </div>
                       <button
-                        onClick={() => onToggleWishlist(product.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onToggleWishlist(product.id);
+                        }}
                         className="text-[#ff9069] transition-colors hover:text-white"
                       >
                         <Heart size={16} fill="currentColor" />

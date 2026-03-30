@@ -3,11 +3,10 @@ import { motion } from 'motion/react';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
 import { PRODUCTS } from '../data/products';
 import { ProductCard } from './ProductCard';
-import { ProductQuickViewModal } from './ProductQuickViewModal';
 import type { Product } from '../types/product';
 
 interface StorePageProps {
-  onNavigate: (target: string) => void;
+  onNavigate: (target: string, param?: string) => void;
   onAddToCart: (productId: string, size: string, sourceElement?: HTMLElement | null) => void;
   wishlist: string[];
   onToggleWishlist: (productId: string) => void;
@@ -58,7 +57,6 @@ export function StorePage({
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [selectedSize, setSelectedSize] = useState('Todos');
   const [query, setQuery] = useState('');
-  const [activeProduct, setActiveProduct] = useState<Product | null>(null);
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
 
@@ -186,12 +184,6 @@ export function StorePage({
 
   return (
     <main className="min-h-screen bg-[#0d0d0d] px-6 pb-24 pt-32 md:px-12">
-      <ProductQuickViewModal
-        product={activeProduct}
-        isOpen={activeProduct !== null}
-        onClose={() => setActiveProduct(null)}
-        onAddToCart={onAddToCart}
-      />
       <section className="container mx-auto">
         <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-[#151515] p-8 md:p-12">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,144,105,0.18),transparent_30%),linear-gradient(180deg,rgba(255,255,255,0.02),transparent)]" />
@@ -318,7 +310,7 @@ export function StorePage({
                       product={product}
                       showCategory
                       onAddToCart={(selectedProduct, size) => onAddToCart(selectedProduct.id, size)}
-                      onOpenProduct={setActiveProduct}
+                      onOpenProduct={(p) => onNavigate('product', p.id)}
                       onToggleWishlist={onToggleWishlist}
                       isWishlisted={wishlist.includes(product.id)}
                     />

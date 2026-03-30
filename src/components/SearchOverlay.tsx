@@ -7,7 +7,7 @@ import { NAV_ITEMS } from '../data/navigation';
 interface SearchOverlayProps {
   isOpen: boolean;
   onClose: () => void;
-  onNavigate: (target: string) => void;
+  onNavigate: (target: string, param?: string) => void;
 }
 
 export function SearchOverlay({ isOpen, onClose, onNavigate }: SearchOverlayProps) {
@@ -42,7 +42,8 @@ export function SearchOverlay({ isOpen, onClose, onNavigate }: SearchOverlayProp
       id: product.id,
       title: product.name,
       subtitle: `${product.category} · ${product.price}`,
-      target: 'store',
+      target: 'product',
+      param: product.id,
       type: 'Product',
     }));
 
@@ -120,7 +121,7 @@ export function SearchOverlay({ isOpen, onClose, onNavigate }: SearchOverlayProp
                     <button
                       key={`${result.type}-${result.id}`}
                       onClick={() => {
-                        onNavigate(result.target);
+                        onNavigate(result.target, (result as any).param);
                         onClose();
                       }}
                       className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-[#171717] px-5 py-4 text-left transition-all hover:border-[#ff9069]/40 hover:bg-[#1f1f1f]"

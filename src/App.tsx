@@ -9,6 +9,7 @@ import { Navbar } from './components/Navbar';
 import { NewsletterSection } from './components/NewsletterSection';
 import { SearchOverlay } from './components/SearchOverlay';
 import { StorePage } from './components/StorePage';
+import { ProductDetailPage } from './components/ProductDetailPage';
 import { CartDrawer } from './components/CartDrawer';
 import { CheckoutModal } from './components/CheckoutModal';
 import { FlyToCartOverlay } from './components/FlyToCartOverlay';
@@ -20,10 +21,18 @@ import type { CartItem } from './types/cart';
 import type { WishlistItem } from './types/wishlist';
 import type { AccountProfile } from './components/AccountSettingsModal';
 
-type Route = 'home' | 'store';
+type Route = 'home' | 'store' | 'product';
 
 function getRouteFromLocation(): Route {
+  if (window.location.pathname.startsWith('/product/')) return 'product';
   return window.location.pathname === '/store' ? 'store' : 'home';
+}
+
+function getProductIdFromLocation(): string | null {
+  if (window.location.pathname.startsWith('/product/')) {
+    return window.location.pathname.replace('/product/', '');
+  }
+  return null;
 }
 
 export default function App() {
@@ -59,6 +68,7 @@ export default function App() {
     visible: false,
   });
   const [route, setRoute] = useState<Route>(getRouteFromLocation);
+  const [activeProductId, setActiveProductId] = useState<string | null>(getProductIdFromLocation);
   const [pendingSection, setPendingSection] = useState<string | null>(null);
 
   function scrollToSection(target: string) {
@@ -72,7 +82,15 @@ export default function App() {
     }
   }
 
-  function handleNavigate(target: string) {
+  function handleNavigate(target: string, param?: string) {
+    if (target === 'product' && param) {
+      setRoute('product');
+      setActiveProductId(param);
+      window.history.pushState(null, '', `/product/${param}`);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
     if (target === 'store') {
       setRoute('store');
       window.history.pushState(null, '', '/store');
@@ -193,6 +211,7 @@ export default function App() {
   useEffect(() => {
     const handlePopState = () => {
       setRoute(getRouteFromLocation());
+      setActiveProductId(getProductIdFromLocation());
       if (window.location.pathname === '/') {
         const hash = window.location.hash.replace('#', '');
         setPendingSection(hash || 'home');
@@ -317,7 +336,7 @@ export default function App() {
       />
 
       <AnimatePresence mode="wait">
-        {route === 'store' ? (
+        {route === 'store' && (
           <motion.div
             key="store"
             initial={{ opacity: 0, y: 24 }}
@@ -332,7 +351,27 @@ export default function App() {
               onToggleWishlist={toggleWishlist}
             />
           </motion.div>
-        ) : (
+        )}
+
+        {route === 'product' && (
+          <motion.div
+            key="product"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -18 }}
+            transition={{ duration: 0.28 }}
+          >
+            <ProductDetailPage
+              product={PRODUCTS.find((p) => p.id === activeProductId) || null}
+              onNavigate={handleNavigate}
+              onAddToCart={handleAddToCart}
+              onToggleWishlist={toggleWishlist}
+              isWishlisted={wishlist.some(item => item.productId === activeProductId)}
+            />
+          </motion.div>
+        )}
+
+        {route === 'home' && (
           <motion.main
             key="home"
             initial={{ opacity: 0, y: 24 }}
